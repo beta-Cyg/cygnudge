@@ -1,0 +1,33 @@
+{
+    cmdlines = {
+        "xmake run task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build gen_data_P1001",
+        "xmake build gen_data_P1001",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake lua /usr/share/xmake/modules/private/utils/statistics.lua",
+        "xmake lua /usr/share/xmake/actions/build/cleaner.lua",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake build task_test",
+        "xmake clean"
+    }
+}

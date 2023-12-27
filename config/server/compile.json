@@ -1,0 +1,5 @@
+{
+	"cpp" : "/usr/bin/g++ {0} -o {1}",
+	"c" : "/usr/bin/gcc {0} -o {1}",
+	"go" : "/usr/bin/go build -o {1} {0}"
+}

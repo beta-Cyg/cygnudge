@@ -1,0 +1,8 @@
+{
+	"temporary_directory" : "/tmp/cygnudge",
+	"problem_directory" : "/var/lib/cygnudge",
+	"problem_achive_directory" : "/var/lib/cygnudge/achive",
+	"compile_json" : "/etc/cygnudge/server/compile.json",
+	"timer" : "/usr/bin/time",
+	"cygpack" : "/bin/cygnudge/cygpack.py"
+}

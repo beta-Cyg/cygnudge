@@ -1,0 +1,24 @@
+{
+	"subtask" : 2,
+	"s0" : {
+		"point" : 2,
+		"p0" : {
+			"time" : 1000,
+			"memory" : 16,
+			"score" : 25
+		},
+		"p1" : {
+			"time" : 1000,
+			"memory" : 16,
+			"score" : 25
+		}
+	},
+	"s1" : {
+		"point" : 1,
+		"p0" : {
+			"time" : 1000,
+			"memory" : 16,
+			"score" : 50
+		}
+	}
+}
