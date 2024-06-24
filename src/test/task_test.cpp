@@ -1,7 +1,7 @@
 #include"../server/judge_task.hpp"
 
 int main(){
-	cyg::task t("2023-12-14_21:33:00_1_P1001.zip");
+	cyg::task t("2023-12-05_18:28:52_1_P1001.zip");
 	t.log();
 	cyg::compile_info::import_compile_commands(cyg::get_env("compile_json"));
 	t.judge();

@@ -16,12 +16,6 @@ target("thread_pool_test")
 	set_languages("c++20")
 	add_cxxflags("-DCYGNUDGE_DEBUG")
 
-target("popen_timeout_test")
-	add_files("src/test/popen_timeout_test.cpp")
-	set_kind("binary")
-	set_languages("c++20")
-	add_cxxflags("-DCYGNUDGE_DEBUG")
-
 target("gen_data_P1001")
 	add_files("src/test/gen_data_P1001.cpp")
 	set_kind("binary")

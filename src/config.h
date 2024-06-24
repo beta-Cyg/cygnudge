@@ -4,7 +4,7 @@
 #ifdef CYGNUDGE_DEBUG
 
 #ifndef CYGNUDGE_SERVER_JSON
-#define CYGNUDGE_SERVER_JSON "/home/beta-cyg/cygnudge/config/server/server.json"
+#define CYGNUDGE_SERVER_JSON "/home/cygnus/cygnudge/config/server/server.json"
 #endif
 
 #else

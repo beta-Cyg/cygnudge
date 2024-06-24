@@ -3,6 +3,8 @@ three-digit code
 - 001 Register
 - 002 Login With Uid
 - 003 Login With Email
+- 004 Get Uid
+- 005 Logout
 - 010 Submit
 
 ## response code

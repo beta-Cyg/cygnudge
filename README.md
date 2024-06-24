@@ -1,5 +1,11 @@
 # Cygnudge Online Judge System
 
+## Installation
+
+- **todo**
+
+- add ```export CGO_ENABLED=0``` to your bash configuration file
+
 ## Usage
 
 ### client
@@ -25,6 +31,8 @@ input password
 server generates a uuid after getting the request from client, then save it in redis and send it to client.
 
 client save uuid in `~/.cygnudge/login.token`
+
+if the account has logined in other devices / local token was deleted (there is token in redis of server, but no token found in the speciafied path in client), then remove the token in redis and re-login? (optional)
 
 - `cygnudge logout`
 
@@ -223,4 +231,23 @@ CE:
 	"score" : 0
 	"status" : "CE"
 }
+```
+
+## Redis format
+
+```javascript
+user-number : {number of account}
+{user-id} : {
+	email : {}
+	password: {}
+	record : {
+		{problem id} : {content of result.json}
+	}
+}
+...
+email-uid : {
+	{email} : {uid}
+	...
+}
+{user-id}-token : {token (uuid)} //Expiration: 24h
 ```

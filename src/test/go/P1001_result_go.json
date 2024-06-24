@@ -1,0 +1,28 @@
+{
+    "score": "100",
+    "status": "AC",
+    "s0": {
+        "point": "2",
+        "p0": {
+            "time": "0",
+            "memory": "3",
+            "return_code": "0",
+            "status": "AC"
+        },
+        "p1": {
+            "time": "0",
+            "memory": "3",
+            "return_code": "0",
+            "status": "AC"
+        }
+    },
+    "s1": {
+        "point": "1",
+        "p0": {
+            "time": "0",
+            "memory": "3",
+            "return_code": "0",
+            "status": "AC"
+        }
+    }
+}
