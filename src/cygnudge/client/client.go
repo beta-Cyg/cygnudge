@@ -289,6 +289,7 @@ func logout(add ServerAddress, uid int, token string) {
 		log.Fatalln(err)
 	}
 	_, response_name = cygnudge.ReceiveGetRes(conn)
+	cygnudge.SendRes("OK", conn)
 	switch response_name {
 	case "OK":
 		break
@@ -299,7 +300,6 @@ func logout(add ServerAddress, uid int, token string) {
 		fmt.Printf("cygnudge logout: user has login from remote client")
 		os.Exit(4)
 	}
-	//todo
 }
 
 func removeLoginUidToken() {

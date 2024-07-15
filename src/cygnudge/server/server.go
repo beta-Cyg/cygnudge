@@ -59,9 +59,12 @@ func handleRegister(conn net.Conn) {
 	}
 	if exist {
 		cygnudge.SendRes("Not Acceptable", conn)
-		log.Fatalf("email has been registered: %s\n", email)
+		log.Printf("email has been registered: %s\n", email)
 	} else {
 		cygnudge.SendRes("OK", conn)
+	}
+	if exist {
+		return
 	}
 
 	buf = make([]byte, 32) //length of hashed password (md5) is 32
@@ -353,6 +356,7 @@ func handleLogout(conn net.Conn) {
 	} else { //no user login
 		cygnudge.SendRes("Not Acceptable", conn)
 	}
+	cygnudge.ReceiveRes("OK", conn)
 }
 
 func process(conn net.Conn) {

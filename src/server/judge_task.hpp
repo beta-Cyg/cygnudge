@@ -81,7 +81,8 @@ namespace cyg{
 			task_dir_path=std::format("{}/{}",temp_dir,hash_code);
 			std::string zip_path=std::format("{}/{}",temp_dir,task_zip_name);
 
-			unpack(task_dir_path/*dir*/,zip_path/*zip_path*/);
+			if(unpack(task_dir_path/*dir*/,zip_path/*zip_path*/)!=0)
+				throw std::runtime_error{"unpack the archieve failed"};
 			//todo give a independent function to do clear work
 			//unlink(zip_path.c_str());//remove task.zip
 			
