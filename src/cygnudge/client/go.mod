@@ -4,7 +4,6 @@ go 1.21.5
 
 require (
 	cygnus.beta/cygnudge v0.0.1
-	golang.org/x/crypto v0.17.0
 	golang.org/x/term v0.15.0
 )
 

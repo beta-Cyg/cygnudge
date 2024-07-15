@@ -171,6 +171,12 @@ no support for optimization options yet
 
 ## task.zip format
 
+### task.zip naming
+
+- time format: `%Y-%M-%d_%h:%m:%s`
+
+- task.zip format: `{time}_{uid}_{pid}.zip`
+
 ### zip content
 
 ```
