@@ -372,8 +372,25 @@ func pack_judgement(pid string, uid int, code_file string) string {
 		log.Fatalln(err)
 	}
 	return zip_path
-} //warning: should handle error and send response to server, but not directly call log.Fatalln
+} //todo warning: should handle error and send response to server, but not directly call log.Fatalln
 
+func checkPid(add ServerAddress, pid string) (string, string) {
+	conn, err := net.Dial("tcp", add.Ip+":"+strconv.Itoa(add.Port))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer conn.Close()
+	cygnudge.SendReq("Check Pid", conn)
+	cygnudge.ReceiveRes("OK", conn)
+	response_code, response_name := "", ""
+	return response_code, response_name
+} //todo: access authentication for user groups
+
+/*
+1. pack task.zip
+2. send uid
+3. send token
+*/
 func judge(add ServerAddress, uid int, token string, pid string, code_file string) {
 	zip_path := pack_judgement(pid, uid, code_file)
 	fmt.Println(zip_path) //debug
@@ -394,4 +411,44 @@ func removeLoginUidToken() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func parseServer(command string, server string, ip string, port int) ServerAddress {
+	if server != "" && ip != "" {
+		fmt.Printf("cygnudge %s: cannot use both server name and ip address to specify the server\n", command)
+		os.Exit(4)
+	}
+	if server == "" && ip == "" {
+		fmt.Printf("cygnudge %s: no server is specified\n", command)
+		os.Exit(4)
+	}
+	//debug
+	fmt.Printf("server name: %s\nserver ip: %s\nserver port: %d\n", server, ip, port)
+	var server_address ServerAddress
+	user, err := user.Current()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if ip == "" { //use server name
+		server_json_path := path.Join(user.HomeDir, ".cygnudge/server.json")
+		server_json_string, err := os.ReadFile(server_json_path)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		var servers map[string]ServerAddress
+		err = json.Unmarshal(server_json_string, &servers)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		tmp, exist := servers[server]
+		if !exist {
+			fmt.Printf("cygnudge %s: server %s not found\n", command, server)
+			os.Exit(4)
+		} //not found
+		server_address = tmp
+	} else {
+		server_address.Ip = ip
+		server_address.Port = port
+	}
+	return server_address
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -19,6 +18,7 @@ func main() {
 	registerCmd := flag.NewFlagSet("register", flag.ExitOnError)
 	loginCmd := flag.NewFlagSet("login", flag.ExitOnError)
 	logoutCmd := flag.NewFlagSet("logout", flag.ExitOnError)
+	judgeCmd := flag.NewFlagSet("judge", flag.ExitOnError)
 	switch os.Args[1] {
 	case "register":
 		{
@@ -32,41 +32,7 @@ func main() {
 			registerCmd.IntVar(&registerPort, "port", 1145, "server ip port")
 			registerCmd.Parse(os.Args[2:])
 			//debug
-			if registerServer != "" && registerIp != "" { //todo: server and port are both specified
-				fmt.Println("cygnudge register: cannot use both server name and ip address to specify the server")
-				os.Exit(2)
-			}
-			if registerServer == "" && registerIp == "" {
-				fmt.Println("cygnudge register: no server is specified")
-				os.Exit(2)
-			}
-			fmt.Printf("server name: %s\nserver ip: %s\nserver port: %d\n", registerServer, registerIp, registerPort)
-			var server_address ServerAddress
-			if registerIp == "" { //use server name
-				user, err := user.Current()
-				if err != nil {
-					log.Fatalln(err)
-				}
-				server_json_path := path.Join(user.HomeDir, ".cygnudge/server.json")
-				server_json_string, err := os.ReadFile(server_json_path)
-				if err != nil {
-					log.Fatalln(err)
-				}
-				var servers map[string]ServerAddress
-				err = json.Unmarshal(server_json_string, &servers)
-				if err != nil {
-					log.Fatalln(err)
-				}
-				tmp, exist := servers[registerServer]
-				if !exist {
-					fmt.Printf("cygnudge register: server %s not found\n", registerServer)
-					os.Exit(2)
-				} //not found
-				server_address = tmp
-			} else {
-				server_address.Ip = registerIp
-				server_address.Port = registerPort
-			}
+			server_address := parseServer("register", registerServer, registerIp, registerPort)
 			register(server_address)
 		}
 	case "login":
@@ -84,42 +50,8 @@ func main() {
 			loginCmd.IntVar(&loginUid, "uid", 0, "user id")
 			loginCmd.StringVar(&loginEmail, "email", "", "user email")
 			loginCmd.Parse(os.Args[2:])
-			if loginServer != "" && loginIp != "" {
-				fmt.Println("cygnudge login: cannot use both server name and ip address to specify the server")
-				os.Exit(3)
-			}
-			if loginServer == "" && loginIp == "" {
-				fmt.Println("cygnudge login: no server is specified")
-				os.Exit(3)
-			}
-			//debug
-			fmt.Printf("server name: %s\nserver ip: %s\nserver port: %d\n", loginServer, loginIp, loginPort)
-			var server_address ServerAddress
-			user, err := user.Current()
-			if err != nil {
-				log.Fatalln(err)
-			}
-			if loginIp == "" { //use server name
-				server_json_path := path.Join(user.HomeDir, ".cygnudge/server.json")
-				server_json_string, err := os.ReadFile(server_json_path)
-				if err != nil {
-					log.Fatalln(err)
-				}
-				var servers map[string]ServerAddress
-				err = json.Unmarshal(server_json_string, &servers)
-				if err != nil {
-					log.Fatalln(err)
-				}
-				tmp, exist := servers[loginServer]
-				if !exist {
-					fmt.Printf("cygnudge login: server %s not found\n", loginServer)
-					os.Exit(3)
-				} //not found
-				server_address = tmp
-			} else {
-				server_address.Ip = loginIp
-				server_address.Port = loginPort
-			}
+
+			server_address := parseServer("login", loginServer, loginIp, loginPort)
 
 			if loginUid != 0 && loginEmail != "" {
 				fmt.Println("cygnudge login: cannot use both email and user id to login")
@@ -133,6 +65,10 @@ func main() {
 			fmt.Printf("user id: %d\nuser email: %s\n", loginUid, loginEmail)
 
 			//check login state
+			user, err := user.Current()
+			if err != nil {
+				log.Fatalln(err)
+			}
 			login_token_path := path.Join(user.HomeDir, ".cygnudge/login_token")
 			_, err = os.Stat(login_token_path)
 			var login_token_string string
@@ -145,6 +81,37 @@ func main() {
 					log.Fatalln(err)
 				}
 			}
+			login_uid_path := path.Join(user.HomeDir, ".cygnudge/login_uid")
+			_, err = os.Stat(login_uid_path)
+			var login_uid_string string
+			if os.IsNotExist(err) {
+				login_uid_string = "0"
+			} else {
+				login_uid_tmp, err := os.ReadFile(login_uid_path)
+				login_uid_string = string(login_uid_tmp)
+				if err != nil {
+					log.Fatalln(err)
+				}
+			}
+			login_uid, err := strconv.Atoi(login_uid_string)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			response_code, response_name := checkLogin(server_address, login_uid, login_token_string)
+			switch response_name {
+			case "OK":
+				fmt.Printf("cygnudge login: another user has login (uid=%d), please logout first\n", login_uid)
+				os.Exit(3)
+			case "Not Acceptable":
+				//not loged in, could login
+				break
+			case "Remote Login":
+				fmt.Printf("cygnudge login: recorded user has login from remote client (uid=%d), please logout first\n", login_uid)
+				os.Exit(3)
+			default:
+				log.Fatalf("unknown response code: %s\n", response_code)
+			}
+
 			if loginUid != 0 {
 				response_code, response_name := checkLogin(server_address, loginUid, login_token_string)
 				switch response_name {
@@ -193,44 +160,13 @@ func main() {
 			logoutCmd.IntVar(&logoutPort, "port", 1145, "server ip port")
 			logoutCmd.Parse(os.Args[2:])
 
-			if logoutServer != "" && logoutIp != "" {
-				fmt.Println("cygnudge logout: cannot use both server name and ip address to specify the server")
-				os.Exit(4)
-			}
-			if logoutServer == "" && logoutIp == "" {
-				fmt.Println("cygnudge logout: no server is specified")
-				os.Exit(4)
-			}
-			//debug
-			fmt.Printf("server name: %s\nserver ip: %s\nserver port: %d\n", logoutServer, logoutIp, logoutPort)
-			var server_address ServerAddress
+			server_address := parseServer("logout", logoutServer, logoutIp, logoutPort)
+
+			//check login state
 			user, err := user.Current()
 			if err != nil {
 				log.Fatalln(err)
 			}
-			if logoutIp == "" { //use server name
-				server_json_path := path.Join(user.HomeDir, ".cygnudge/server.json")
-				server_json_string, err := os.ReadFile(server_json_path)
-				if err != nil {
-					log.Fatalln(err)
-				}
-				var servers map[string]ServerAddress
-				err = json.Unmarshal(server_json_string, &servers)
-				if err != nil {
-					log.Fatalln(err)
-				}
-				tmp, exist := servers[logoutServer]
-				if !exist {
-					fmt.Printf("cygnudge logout: server %s not found\n", logoutServer)
-					os.Exit(4)
-				} //not found
-				server_address = tmp
-			} else {
-				server_address.Ip = logoutIp
-				server_address.Port = logoutPort
-			}
-
-			//check login state
 			login_token_path := path.Join(user.HomeDir, ".cygnudge/login_token")
 			_, err = os.Stat(login_token_path)
 			var login_token_string string
@@ -268,12 +204,93 @@ func main() {
 				removeLoginUidToken()
 			case "Not Acceptable":
 				fmt.Println("cygnudge logout: invalid local token")
-				removeLoginUidToken() //todo: remove login_token and login_uid
-				os.Exit(4)
-			case "Remote Login":
-				fmt.Printf("cygnudge login: user has login from remote client (uid=%d)\n", login_uid)
 				removeLoginUidToken()
 				os.Exit(4)
+			case "Remote Login":
+				fmt.Printf("cygnudge logout: user has login from remote client (uid=%d)\n", login_uid)
+				removeLoginUidToken()
+				os.Exit(4)
+			default:
+				log.Fatalf("unknown response code: %s\n", response_code)
+			}
+		}
+	case "judge":
+		{
+			var (
+				judgeServer string
+				judgeIp     string
+				judgePort   int
+				judgePid    string
+				judgeCode   string // Path of the code file
+			)
+			judgeCmd.StringVar(&judgeServer, "server", "", "server name")
+			judgeCmd.StringVar(&judgeIp, "ip", "", "server ip address")
+			judgeCmd.IntVar(&judgePort, "port", 1145, "server ip port")
+			judgeCmd.StringVar(&judgePid, "pid", "", "problem id")
+			judgeCmd.StringVar(&judgeCode, "code", "", "code file")
+			judgeCmd.Parse(os.Args[2:])
+
+			server_address := parseServer("judge", judgeServer, judgeIp, judgePort)
+
+			//todo: check code file and problem id
+			_, response_name := checkPid(server_address, judgePid)
+			switch response_name {
+			case "OK":
+				break
+			case "Not Acceptable":
+				fmt.Println("cygnudge judge: problem does not exist")
+				os.Exit(5)
+			}
+
+			//check login state: find local uid & token
+			user, err := user.Current()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			login_token_path := path.Join(user.HomeDir, ".cygnudge/login_token")
+			_, err = os.Stat(login_token_path)
+			var login_token_string string
+			if os.IsNotExist(err) { //token doesn't exist
+				fmt.Println("cygnudge judge: no user login")
+				os.Exit(5)
+			} else {
+				login_token_tmp, err := os.ReadFile(login_token_path)
+				login_token_string = string(login_token_tmp)
+				if err != nil {
+					log.Fatalln(err)
+				}
+			}
+			login_uid_path := path.Join(user.HomeDir, ".cygnudge/login_uid")
+			_, err = os.Stat(login_uid_path)
+			var login_uid_string string
+			if os.IsNotExist(err) {
+				fmt.Println("cygnudge judge: no user login")
+				os.Exit(5)
+			} else {
+				login_uid_tmp, err := os.ReadFile(login_uid_path)
+				login_uid_string = string(login_uid_tmp)
+				if err != nil {
+					log.Fatalln(err)
+				}
+			}
+			login_uid, err := strconv.Atoi(login_uid_string)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			//check login state
+			response_code, response_name := checkLogin(server_address, login_uid, login_token_string)
+			switch response_name {
+			case "OK":
+				judge(server_address, login_uid, login_token_string, judgePid, judgeCode)
+				removeLoginUidToken()
+			case "Not Acceptable":
+				fmt.Println("cygnudge judge: invalid local token")
+				removeLoginUidToken()
+				os.Exit(5)
+			case "Remote Login":
+				fmt.Printf("cygnudge judge: user has login from remote client (uid=%d)\n", login_uid)
+				removeLoginUidToken()
+				os.Exit(5)
 			default:
 				log.Fatalf("unknown response code: %s\n", response_code)
 			}

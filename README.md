@@ -247,7 +247,10 @@ user-number : {number of account}
 	email : {}
 	password: {}
 	record : {
-		{problem id} : {content of result.json}
+		{problem id} : {
+			content of result.json
+			...
+		}
 	}
 }
 ...
@@ -256,4 +259,8 @@ email-uid : {
 	...
 }
 {user-id}-token : {token (uuid)} //Expiration: 24h
+{problem} : {
+	{problem-id}
+	...
+} //Set
 ```
