@@ -347,6 +347,8 @@ func handleLogout(conn net.Conn) {
 	cygnudge.ReceiveRes("OK", conn)
 }
 
+func handleJudge(conn net.Conn) {}
+
 func process(conn net.Conn) {
 	defer conn.Close()
 	defer func() {
@@ -370,6 +372,9 @@ func process(conn net.Conn) {
 	case "Logout":
 		cygnudge.SendRes("OK", conn)
 		handleLogout(conn)
+	case "Judge":
+		cygnudge.SendRes("OK",conn)
+		handleJudge(conn)
 	default:
 		cygnudge.SendRes("Bad Request", conn)
 	}

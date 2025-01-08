@@ -4,7 +4,7 @@
 
 - **todo**
 
-- add ```export CGO_ENABLED=0``` to your bash configuration file
+- add `export CGO_ENABLED=0` to your bash configuration file
 
 ## Usage
 

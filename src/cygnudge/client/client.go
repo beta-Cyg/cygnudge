@@ -294,6 +294,7 @@ func main() {
 			default:
 				log.Fatalf("unknown response code: %s\n", response_code)
 			}
+			//todo sendReq to server
 		}
 	default:
 		{

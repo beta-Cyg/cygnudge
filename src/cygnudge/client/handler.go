@@ -345,12 +345,14 @@ func pack_judgement(pid string, uid int, code_file string) string {
 	w := zip.NewWriter(file)
 	defer w.Close()
 
+	//create task.json in archieve
 	f, err := w.Create("task.json")
 	if err != nil {
 		log.Fatalln(err)
 	}
 	f.Write([]byte(task_json_string))
 
+	//copy code into archieve
 	f, err = w.Create("code." + lang)
 	if err != nil {
 		log.Fatalln(err)

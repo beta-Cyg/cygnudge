@@ -173,3 +173,4 @@ func ReceiveGetReq(conn net.Conn) (string, string) {
 	log.Printf("ReceiveGetReq: %s %s\n", request_code, request_name)
 	return request_code, request_name
 }
+

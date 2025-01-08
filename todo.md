@@ -1,3 +1,11 @@
+# Of Top Importance
+
+- Network module in client/client.go
+
+- Network module in server/handler.go
+
+# Common
+
 - Judge module for server (working)
 - Network module for server (working)
 - Network module for client (working)
